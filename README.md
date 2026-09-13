@@ -56,11 +56,21 @@ curl -X POST http://127.0.0.1:8000/api/conversations/CONVERSATION_ID/messages \
   -d '{"body":"Hello"}'
 ```
 
-Operator routes are under `/api/operator/conversations` and use Laravel's existing authenticated `web` user session. No operator login flow is included.
+Operator authentication uses expiring, revocable Laravel Sanctum Bearer tokens. Create an account interactively with `php artisan operator:create`; revoke all its device tokens with `php artisan operator:revoke-tokens operator@example.com`. Tokens have only `chat:read` and `chat:reply` abilities and default to 90 days (`OPERATOR_TOKEN_TTL_DAYS`).
+
+```bash
+curl -X POST https://ws-chat-zakacoding.fly.dev/api/operator/auth/login \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  -d '{"email":"operator@example.com","password":"REPLACE_ME","device_name":"Zaka iPhone"}'
+curl https://ws-chat-zakacoding.fly.dev/api/operator/auth/me \
+  -H 'Accept: application/json' -H 'Authorization: Bearer REPLACE_ME'
+```
+
+Use the returned token for the operator conversation endpoints and `POST /api/operator/broadcasting/auth` (read ability). Reply and close/reopen operations require `chat:reply`. Logout is `DELETE /api/operator/auth/logout` and revokes only the current device. The static frontend should keep the token in runtime device storage, never in the build or a URL. Configure `CORS_ALLOWED_ORIGINS` and `REVERB_ALLOWED_ORIGINS` with `https://zakacoding.github.io` plus explicit local origins; credentials remain disabled.
 
 ## Realtime contract
 
-Authorize private subscriptions at `POST /broadcasting/auth`. Guests send the same bearer token used by the REST API; operators use their authenticated Laravel session.
+Authorize private subscriptions at `POST /broadcasting/auth` for guests, or `POST /api/operator/broadcasting/auth` for operators. Guests send their conversation bearer token; operators send the Sanctum bearer token.
 
 - Private channel: `private-conversation.{conversationId}`
 - Laravel/Echo channel name: `conversation.{conversationId}`

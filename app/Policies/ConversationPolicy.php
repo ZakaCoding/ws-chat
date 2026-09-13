@@ -12,7 +12,7 @@ class ConversationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->is_operator;
     }
 
     /**
@@ -20,7 +20,7 @@ class ConversationPolicy
      */
     public function view(User $user, Conversation $conversation): bool
     {
-        return true;
+        return $user->is_operator;
     }
 
     /**
@@ -28,7 +28,7 @@ class ConversationPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->is_operator;
     }
 
     /**
@@ -36,7 +36,7 @@ class ConversationPolicy
      */
     public function update(User $user, Conversation $conversation): bool
     {
-        return true;
+        return $user->is_operator;
     }
 
     /**

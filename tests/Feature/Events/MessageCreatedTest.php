@@ -21,11 +21,11 @@ class MessageCreatedTest extends TestCase
 
     public function test_broadcast_payload_matches_rest_message_payload(): void
     {
-        $operator = User::factory()->create(['name' => 'Ada Operator']);
+        $operator = User::factory()->create(['name' => 'Ada Operator', 'is_operator' => true]);
         $conversation = Conversation::factory()->create();
         Event::fake([MessageCreated::class]);
 
-        $response = $this->actingAs($operator)->postJson(
+        $response = $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)->postJson(
             '/api/operator/conversations/'.$conversation->id.'/messages',
             ['body' => 'Canonical payload'],
         );

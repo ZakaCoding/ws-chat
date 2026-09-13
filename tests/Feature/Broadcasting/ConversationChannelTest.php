@@ -45,9 +45,9 @@ class ConversationChannelTest extends TestCase
     public function test_operator_can_subscribe_to_conversation_a(): void
     {
         [$conversationA] = $this->guestConversation('token-a');
-        $operator = User::factory()->create();
+        $operator = User::factory()->create(['is_operator' => true]);
 
-        $this->actingAs($operator)
+        $this->withToken($operator->createToken('test', ['chat:read'])->plainTextToken)
             ->postJson('/broadcasting/auth', $this->channelPayload($conversationA))
             ->assertOk()
             ->assertJsonStructure(['auth']);

@@ -52,5 +52,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute((int) config('chat.rate_limits.broadcast_auth_per_minute'))
                 ->by('broadcast-auth|'.$principalKey.'|'.$request->ip());
         });
+        RateLimiter::for('operator-login', fn (Request $request): Limit => Limit::perMinute(
+            (int) config('chat.rate_limits.operator_login_per_minute'),
+        )->by('operator-login|'.strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('operator-messages', fn (Request $request): Limit => Limit::perMinute(
+            (int) config('chat.rate_limits.operator_messages_per_minute'),
+        )->by('operator-message|'.($request->user()?->getAuthIdentifier() ?? 'unknown').'|'.$request->ip()));
     }
 }

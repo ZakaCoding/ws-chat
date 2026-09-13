@@ -22,12 +22,12 @@ class OperatorConversationTest extends TestCase
 
     public function test_operator_lists_conversations_by_last_message_time_with_pagination(): void
     {
-        $operator = User::factory()->create();
+        $operator = User::factory()->create(['is_operator' => true]);
         $older = Conversation::factory()->create(['last_message_at' => '2026-09-13 10:00:00']);
         $newer = Conversation::factory()->create(['last_message_at' => '2026-09-13 11:00:00']);
         $empty = Conversation::factory()->create(['last_message_at' => null]);
 
-        $response = $this->actingAs($operator)
+        $response = $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)
             ->getJson('/api/operator/conversations?per_page=2');
 
         $response->assertOk()
@@ -40,14 +40,14 @@ class OperatorConversationTest extends TestCase
 
     public function test_operator_views_conversation_with_message_history(): void
     {
-        $operator = User::factory()->create();
+        $operator = User::factory()->create(['is_operator' => true]);
         $conversation = Conversation::factory()->create();
         $guest = Participant::factory()->for($conversation)->create();
         $message = Message::factory()->for($conversation)->for($guest)->create([
             'body' => 'Existing message',
         ]);
 
-        $response = $this->actingAs($operator)
+        $response = $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)
             ->getJson('/api/operator/conversations/'.$conversation->id);
 
         $response->assertOk()
@@ -59,11 +59,11 @@ class OperatorConversationTest extends TestCase
 
     public function test_operator_replies_to_open_conversation(): void
     {
-        $operator = User::factory()->create(['name' => 'Support Operator']);
+        $operator = User::factory()->create(['name' => 'Support Operator', 'is_operator' => true]);
         $conversation = Conversation::factory()->create();
         Event::fake([MessageCreated::class]);
 
-        $response = $this->actingAs($operator)->postJson(
+        $response = $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)->postJson(
             '/api/operator/conversations/'.$conversation->id.'/messages',
             ['body' => '  How can I help?  '],
         );
@@ -88,10 +88,10 @@ class OperatorConversationTest extends TestCase
 
     public function test_operator_closes_conversation(): void
     {
-        $operator = User::factory()->create();
+        $operator = User::factory()->create(['is_operator' => true]);
         $conversation = Conversation::factory()->create();
 
-        $response = $this->actingAs($operator)->patchJson(
+        $response = $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)->patchJson(
             '/api/operator/conversations/'.$conversation->id,
             ['status' => 'closed'],
         );
@@ -105,10 +105,10 @@ class OperatorConversationTest extends TestCase
 
     public function test_operator_reply_to_closed_conversation_returns_409(): void
     {
-        $operator = User::factory()->create();
+        $operator = User::factory()->create(['is_operator' => true]);
         $conversation = Conversation::factory()->closed()->create();
 
-        $this->actingAs($operator)->postJson(
+        $this->withToken($operator->createToken('test', ['chat:read', 'chat:reply'])->plainTextToken)->postJson(
             '/api/operator/conversations/'.$conversation->id.'/messages',
             ['body' => 'Cannot send'],
         )->assertConflict();
