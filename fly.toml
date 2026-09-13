@@ -1,0 +1,68 @@
+app = "ws-chat-zakacoding"
+primary_region = "sin"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  APP_URL = "https://ws-chat-zakacoding.fly.dev"
+  LOG_CHANNEL = "stderr"
+  LOG_LEVEL = "info"
+  DB_CONNECTION = "sqlite"
+  DB_DATABASE = "/data/database.sqlite"
+  DB_BUSY_TIMEOUT = "5000"
+  DB_JOURNAL_MODE = "WAL"
+  DB_SYNCHRONOUS = "NORMAL"
+  DB_TRANSACTION_MODE = "IMMEDIATE"
+  SESSION_DRIVER = "database"
+  SESSION_SECURE_COOKIE = "true"
+  CACHE_STORE = "database"
+  QUEUE_CONNECTION = "database"
+  BROADCAST_CONNECTION = "reverb"
+  OCTANE_SERVER = "frankenphp"
+  OCTANE_HTTPS = "true"
+  REVERB_HOST = "ws-chat-zakacoding.fly.dev"
+  REVERB_PORT = "443"
+  REVERB_SCHEME = "https"
+  REVERB_SERVER_HOST = "127.0.0.1"
+  REVERB_SERVER_PORT = "8081"
+  REVERB_ALLOWED_ORIGINS = "ws-chat-zakacoding.fly.dev"
+
+[mounts]
+  source = "ws_chat_data"
+  destination = "/data"
+  initial_size = "1GB"
+  snapshot_retention = 14
+  auto_extend_size_threshold = 80
+  auto_extend_size_increment = "1GB"
+  auto_extend_size_limit = "5GB"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/up"
+    protocol = "http"
+    [http_service.checks.headers]
+      X-Forwarded-Proto = "https"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1gb"

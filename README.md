@@ -88,3 +88,28 @@ Guest credentials contain 256 bits of random entropy and are encoded as URL-safe
 ```bash
 php artisan test --compact
 ```
+
+## Fly.io deployment
+
+The included `Dockerfile` and `fly.toml` run Octane, Reverb, and the database queue worker in one supervised Fly Machine. Caddy routes `/app/*` and `/apps/*` to Reverb and all other traffic to Laravel. SQLite lives at `/data/database.sqlite` on the encrypted `ws_chat_data` volume; automatic daily snapshots are retained for 14 days.
+
+The deployment intentionally stays at one Machine because a Fly volume attaches to one Machine and this application uses SQLite. Keep `auto_stop_machines = "off"` so WebSocket connections and queued broadcasts remain available.
+
+Install and authenticate the Fly CLI, then create and deploy the application:
+
+```bash
+fly auth login
+fly apps create ws-chat-zakacoding
+fly volumes create ws_chat_data --region sin --size 1 --snapshot-retention 14 -a ws-chat-zakacoding
+
+fly secrets set -a ws-chat-zakacoding \
+  APP_KEY="$(php artisan key:generate --show)" \
+  REVERB_APP_ID="$(php -r 'echo bin2hex(random_bytes(16));')" \
+  REVERB_APP_KEY="$(php -r 'echo bin2hex(random_bytes(16));')" \
+  REVERB_APP_SECRET="$(php -r 'echo bin2hex(random_bytes(32));')"
+
+fly deploy -a ws-chat-zakacoding
+fly status -a ws-chat-zakacoding
+```
+
+The container creates the SQLite file, runs `php artisan migrate --force`, caches Laravel configuration and routes, and then starts all three services. Configure `REVERB_ALLOWED_ORIGINS` with `fly secrets set` when the production frontend origin is known.
