@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Minishlink\WebPush\WebPush;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,7 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(WebPush::class, fn () => new WebPush(
+            ['VAPID' => ['subject' => config('push.subject'), 'publicKey' => config('push.public_key'), 'privateKey' => config('push.private_key')]],
+            ['TTL' => 86400, 'urgency' => 'high'],
+            15,
+            ['allow_redirects' => false],
+        ));
     }
 
     /**

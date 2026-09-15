@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['status', 'last_message_at'])]
+#[Fillable(['status', 'last_message_at', 'contact_email'])]
 class Conversation extends Model
 {
     /** @use HasFactory<ConversationFactory> */
@@ -34,6 +34,7 @@ class Conversation extends Model
         return [
             'status' => ConversationStatus::class,
             'last_message_at' => 'datetime',
+            'contact_email' => 'encrypted',
         ];
     }
 }

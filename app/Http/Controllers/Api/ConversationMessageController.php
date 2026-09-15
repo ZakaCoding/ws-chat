@@ -24,6 +24,7 @@ class ConversationMessageController extends Controller
             $conversation,
             $participant,
             (string) $request->validated('body'),
+            $request->validated('client_message_id'),
         );
 
         return new MessageResource($message);

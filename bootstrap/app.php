@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withBroadcasting(
         __DIR__.'/../routes/channels.php',
-        ['middleware' => ['web', AuthenticateConversationBroadcast::class, 'throttle:broadcast-auth']],
+        ['middleware' => [AuthenticateConversationBroadcast::class, 'throttle:broadcast-auth']],
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

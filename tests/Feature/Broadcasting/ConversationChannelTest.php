@@ -53,6 +53,19 @@ class ConversationChannelTest extends TestCase
             ->assertJsonStructure(['auth']);
     }
 
+    public function test_operator_can_subscribe_to_operator_inbox(): void
+    {
+        $operator = User::factory()->create(['is_operator' => true]);
+
+        $this->withToken($operator->createToken('test', ['chat:read'])->plainTextToken)
+            ->postJson('/api/operator/broadcasting/auth', [
+                'channel_name' => 'private-operator.inbox',
+                'socket_id' => '1234.5678',
+            ])
+            ->assertOk()
+            ->assertJsonStructure(['auth']);
+    }
+
     public function test_guest_authentication_does_not_leak_between_requests(): void
     {
         [$conversationA, $tokenA] = $this->guestConversation('token-a');

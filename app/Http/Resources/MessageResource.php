@@ -22,6 +22,7 @@ class MessageResource extends JsonResource
                 'name' => $this->participant->name,
             ],
             'body' => $this->body,
+            'client_message_id' => $this->client_message_id,
             'created_at' => $this->created_at->toISOString(),
         ];
     }

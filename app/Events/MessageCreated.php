@@ -30,6 +30,7 @@ class MessageCreated implements ShouldBroadcast, ShouldDispatchAfterCommit
     {
         return [
             new PrivateChannel('conversation.'.$this->message->conversation_id),
+            new PrivateChannel('operator.inbox'),
         ];
     }
 

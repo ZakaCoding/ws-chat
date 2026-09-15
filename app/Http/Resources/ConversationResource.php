@@ -17,6 +17,7 @@ class ConversationResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status->value,
+            'contact_email' => $this->contact_email,
             'last_message_at' => $this->last_message_at?->toISOString(),
             'created_at' => $this->created_at->toISOString(),
             'messages' => MessageResource::collection($this->whenLoaded('messages')),

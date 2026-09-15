@@ -24,6 +24,7 @@ class StoreMessageRequest extends FormRequest
     {
         return [
             'body' => ['required', 'string', 'max:4096'],
+            'client_message_id' => ['nullable', 'uuid'],
         ];
     }
 
