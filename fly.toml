@@ -30,7 +30,7 @@ kill_timeout = "30s"
   REVERB_SCHEME = "https"
   REVERB_SERVER_HOST = "127.0.0.1"
   REVERB_SERVER_PORT = "8081"
-  REVERB_ALLOWED_ORIGINS = "ws-chat-zakacoding.fly.dev"
+  REVERB_ALLOWED_ORIGINS = "zakacoding.github.io,www.zakacoding.github.io"
   CORS_ALLOWED_ORIGINS = "https://zakacoding.github.io,https://www.zakacoding.github.io"
 
 [mounts]

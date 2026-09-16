@@ -21,6 +21,13 @@ class AuthenticateConversationGuest
     {
         $conversation = $request->route('conversation');
 
+        // Explicit route model binding is not guaranteed to have run before
+        // this middleware on every route, so resolve the ULID here as well.
+        if (is_string($conversation)) {
+            $conversation = (new Conversation)->resolveRouteBinding($conversation);
+            $request->route()->setParameter('conversation', $conversation);
+        }
+
         if (! $conversation instanceof Conversation) {
             abort(404);
         }
